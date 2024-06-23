@@ -64,11 +64,6 @@ replication
 		Client_Reliable_SendVariant, Client_Reliable_SendComplete;
 }
 
-function StartRepLink()
-{
-	GotoState('RepSetup');
-}
-
 state RepSetup
 {
 Begin:

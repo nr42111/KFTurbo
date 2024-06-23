@@ -39,7 +39,7 @@ function Timer()
             NewRepLink.OwningReplicationInfo = KFPlayerReplicationInfo(CurrentPlayerController.PlayerReplicationInfo);
 
             CurrentPlayerController.PlayerReplicationInfo.CustomReplicationInfo = NewRepLink;
-            NewRepLink.StartRepLink();
+            NewRepLink.GotoState('RepSetup');
         }
         else
         {
@@ -53,7 +53,7 @@ function Timer()
             NewRepLink.OwningReplicationInfo = KFPlayerReplicationInfo(CurrentPlayerController.PlayerReplicationInfo);
 
             LastLinkedReplicationInfo.NextReplicationInfo = NewRepLink;
-            NewRepLink.StartRepLink();
+            NewRepLink.GotoState('RepSetup');
         }
 	}
 
