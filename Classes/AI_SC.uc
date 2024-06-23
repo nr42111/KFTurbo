@@ -35,7 +35,7 @@ function ForceRage(Pawn Pawn)
 	}
 	
 	//Attempt a ranged attack to try the normal rage flow.
-	RangedAttack(none);
+	ZSC.RangedAttack(none);
 }
 
 

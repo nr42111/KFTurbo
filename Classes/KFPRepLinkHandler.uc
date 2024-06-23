@@ -1,5 +1,4 @@
-class KFPRepLinkHandler extends Actor
-    dependson(KFPRepLink);
+class KFPRepLinkHandler extends Actor;
 
 var array<ServerStStats> PendingReplicationLinkList;
 
@@ -11,13 +10,14 @@ function OnServerStatsAdded(ServerStStats Stats)
 
 function Timer()
 {
-	local int i;
+    local int i;
     local KFPlayerController CurrentPlayerController;
     local LinkedReplicationInfo LastLinkedReplicationInfo;
     local KFPRepLink NewRepLink;
-	
-	for(i = (PendingReplicationLinkList.Length - 1); i>=0; --i)
-	{
+    local array<LinkedReplicationInfo> NewRepLinkList;
+    
+    for(i = (PendingReplicationLinkList.Length - 1); i>=0; --i)
+    {
         CurrentPlayerController = KFPlayerController(PendingReplicationLinkList[i].Owner);
 
         if (CurrentPlayerController == none)
@@ -39,7 +39,7 @@ function Timer()
             NewRepLink.OwningReplicationInfo = KFPlayerReplicationInfo(CurrentPlayerController.PlayerReplicationInfo);
 
             CurrentPlayerController.PlayerReplicationInfo.CustomReplicationInfo = NewRepLink;
-            NewRepLink.GotoState('RepSetup');
+            NewRepLink.InitializeRepSetup();
         }
         else
         {
@@ -53,9 +53,21 @@ function Timer()
             NewRepLink.OwningReplicationInfo = KFPlayerReplicationInfo(CurrentPlayerController.PlayerReplicationInfo);
 
             LastLinkedReplicationInfo.NextReplicationInfo = NewRepLink;
-            NewRepLink.GotoState('RepSetup');
+            NewRepLink.InitializeRepSetup();
         }
-	}
 
-	PendingReplicationLinkList.Length = 0;
+        NewRepLinkList[NewRepLinkList.Length] = NewRepLink;
+    }
+
+    PendingReplicationLinkList.Length = 0;
+
+    for(i = (NewRepLinkList.Length - 1); i>=0; --i)
+    {
+        KFPRepLink(NewRepLinkList[i]).SetupPlayerInfo();
+    }
+}
+
+defaultproperties
+{
+
 }

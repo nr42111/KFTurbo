@@ -1,6 +1,8 @@
 //Core of the KFTurbo mod. Needed for UI changes (as well as some other functionality).
 class KFTurboMut extends Mutator;
 
+#exec obj load file="..\Animations\KFTurboContent.ukx" package=KFTurbo
+
 var array<KFGameType.SpecialSquad> FinalSquads;			// Squads that spawn with the Patriarch
 var array<KFGameType.SpecialSquad> ShortSpecialSquads;		// The special squad array for a short game
 var array<KFGameType.SpecialSquad> NormalSpecialSquads;	// The special squad array for a normal game
