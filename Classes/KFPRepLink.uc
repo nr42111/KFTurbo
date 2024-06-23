@@ -129,8 +129,6 @@ simulated function SetupPlayerInfo()
         }
     }
 
-    InitializeRepSetup();
-
     //If GroupSkins has a Default list, append it now.
     AppendVariantSelectionList(PlayerVariantList, GetDataFromGroup(Default));
 
