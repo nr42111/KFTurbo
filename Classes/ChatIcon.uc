@@ -11,7 +11,7 @@ simulated function Tick(float DeltaTime)
 
 	if (Owner == None)
 	{
-		//Destroy();
+		Destroy();
 	}
 }
 

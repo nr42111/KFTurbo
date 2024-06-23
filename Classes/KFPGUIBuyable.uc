@@ -26,5 +26,5 @@ function class<KFWeapon> GetWeapon()
 
 defaultproperties
 {
-     VariantSelection=-1
+    VariantSelection=-1
 }
