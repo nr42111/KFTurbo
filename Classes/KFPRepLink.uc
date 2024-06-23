@@ -64,16 +64,21 @@ replication
 		Client_Reliable_SendVariant, Client_Reliable_SendComplete;
 }
 
-auto state RepSetup
+function StartRepLink()
+{
+	GotoState('RepSetup');
+}
+
+state RepSetup
 {
 Begin:
-	Sleep(0.5f);
 	if (Level.NetMode == NM_Client)
 	{
 		Stop;
 	}
 
-	Sleep(0.5f);
+	Sleep(0.1f);
+
 	while (OwningController == None)
 	{
 		FailureCount++;
@@ -106,7 +111,6 @@ Begin:
 
 	Client_Reliable_SendComplete();
 }
-
 
 simulated function SetupPlayerInfo()
 {

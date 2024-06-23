@@ -6,6 +6,11 @@ var array<KFGameType.SpecialSquad> ShortSpecialSquads;		// The special squad arr
 var array<KFGameType.SpecialSquad> NormalSpecialSquads;	// The special squad array for a normal game
 var array<KFGameType.SpecialSquad> LongSpecialSquads;		// The special squad array for a long game
 
+var array<PlayerController> PendingPlayers;
+
+var KFPClassyGorefastHandler ClassyGorefastHandler;
+var KFPRepLinkHandler RepLinkHandler;
+
 simulated function PostBeginPlay()
 {
 	Super.PostBeginPlay();
@@ -23,52 +28,8 @@ simulated function PostBeginPlay()
 		DeathMatch(Level.Game).LoginMenuClass = string(class'KFPInvasionLoginMenu');
 
 		//Every 5 seconds check if our queued spawn has a replaceable zed.
-		SetTimer(5.f, true);
-	}
-}
-
-event Timer()
-{
-	local KFGameType KFGT;
-	local int Index;
-
-	KFGT = KFGameType(Level.Game);
-
-	if(KFGT == None)
-	{
-		return;
-	}
-
-	//Classy Gorefasts don't fit in with other events.
-	if(KFGT.GetSpecialEventType() != ET_None)
-	{
-		return;
-	}
-
-	//Only replace a zed 50% of the time.
-	if(FRand() < 0.5f)
-	{
-		return;
-	}
-
-	for(Index = 0; Index < KFGT.NextSpawnSquad.Length; Index++)
-	{
-		//We already replaced a class in this squad!
-		if(KFGT.NextSpawnSquad[Index] == class'P_Gorefast_Classy')
-		{
-			break;
-		}
-
-		if(ClassIsChildOf(KFGT.NextSpawnSquad[Index], class'P_Gorefast'))
-		{
-			KFGT.NextSpawnSquad[Index] = class'P_Gorefast_Classy';
-
-			//We shouldn't just automatically replace all of them, roll dice each time we try.
-			if(FRand() < 0.5f)
-			{
-				break;
-			}
-		}
+		ClassyGorefastHandler = Spawn(class'KFPClassyGorefastHandler', self);
+		RepLinkHandler = Spawn(class'KFPRepLinkHandler', self);
 	}
 }
 
@@ -132,9 +93,9 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
 		UpdateRandomItemPickup(KFRandomItemSpawn(Other));
 	}
 
-	if (KFPlayerReplicationInfo(Other) != None)
+	if (RepLinkHandler != none && ServerStStats(Other) != None)
 	{
-		UpdatePlayerReplicationInfo(KFPlayerReplicationInfo(Other));
+		RepLinkHandler.OnServerStatsAdded(ServerStStats(Other));
 	}
 
 	return true;
@@ -150,29 +111,6 @@ function UpdateRandomItemPickup(KFRandomItemSpawn PickupSpawner)
 	PickupSpawner.PickupClasses[5] = Class'W_Axe_Pickup';
 	//PickupSpawner.PickupClasses[6]=Class'KFTurbo.MachetePickup'
 	//PickupSpawner.PickupClasses[7]=Class'KFTurbo.Vest'
-}
-
-function UpdatePlayerReplicationInfo(KFPlayerReplicationInfo PlayerReplicationInfo)
-{
-	local KFPRepLink KFPLinkedReplicationInfo;
-
-	if (UTServerAdminSpectator(PlayerReplicationInfo.Owner) != None)
-	{
-		return;
-	}
-
-	KFPLinkedReplicationInfo = Spawn(class'KFPRepLink', PlayerReplicationInfo.Owner);
-
-	if (KFPLinkedReplicationInfo == None)
-	{
-		return;
-	}
-
-	KFPLinkedReplicationInfo.NextReplicationInfo = PlayerReplicationInfo.CustomReplicationInfo;
-	PlayerReplicationInfo.CustomReplicationInfo = KFPLinkedReplicationInfo;
-
-	KFPLinkedReplicationInfo.OwningController = KFPlayerController(PlayerReplicationInfo.Owner);
-	KFPLinkedReplicationInfo.OwningReplicationInfo = PlayerReplicationInfo;
 }
 
 function ModifyPlayer(Pawn Other)

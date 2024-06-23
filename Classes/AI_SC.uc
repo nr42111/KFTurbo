@@ -34,6 +34,7 @@ function ForceRage(Pawn Pawn)
 		ZSC.Health = RageHealth;
 	}
 	
+	//Attempt a ranged attack to try the normal rage flow.
 	RangedAttack(none);
 }
 
