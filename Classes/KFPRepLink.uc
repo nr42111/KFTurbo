@@ -14,6 +14,7 @@ var int WeaponIndex;
 var int VariantIndex;
 
 var int FailureCount;
+var bool bHasPerformedSetup;
 
 replication
 {
@@ -25,6 +26,11 @@ state RepSetup
 {
 Begin:
     if (Level.NetMode == NM_Client)
+    {
+        Stop;
+    }
+
+    if (bHasPerformedSetup)
     {
         Stop;
     }
@@ -72,6 +78,13 @@ simulated function InitializeRepSetup()
 
 function SetupPlayerInfo()
 {
+    if (!bHasPerformedSetup)
+    {
+        return;
+    }
+
+    bHasPerformedSetup = true;
+
     PlayerID = OwningController.GetPlayerIDHash();
     KFTurboMutator.RepLinkSettings.GeneratePlayerVariantData(PlayerID, PlayerVariantList);
 }
@@ -195,4 +208,6 @@ defaultproperties
 {
     bOnlyRelevantToOwner=True
     bAlwaysRelevant=False
+
+    bHasPerformedSetup=true
 }

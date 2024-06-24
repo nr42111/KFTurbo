@@ -339,4 +339,14 @@ defaultproperties
     End Object
     GroupList(0)=KFTurboRepLinkSettingsGroup'KFTurbo.KFTurboRepLinkSettings.RepLinkDefaultGroup'
 
+    Begin Object Class=KFTurboRepLinkSettingsUser Name=RepLinkTestUser
+        PlayerSteamID="20b300195d48c2ccc2651885cfea1a2f"
+        DisplayName="Retard"
+        VariantIDList(0)="RET"
+        VariantIDList(1)="SCUD"
+        VariantIDList(2)="CUBIC"
+        VariantIDList(3)="SHOWME"
+    End Object
+    UserList(0)=KFTurboRepLinkSettingsUser'KFTurbo.KFTurboRepLinkSettings.RepLinkTestUser'
+
 }
