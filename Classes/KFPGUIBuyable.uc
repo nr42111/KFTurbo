@@ -1,17 +1,16 @@
 class KFPGUIBuyable extends GUIBuyable;
 
-var array< class<Pickup> > VariantClasses;
-var array< byte > VariantStatus;
+var array<KFTurboRepLinkSettings.VariantWeapon> VariantList;
 var int VariantSelection;
 
 function class<Pickup> GetPickup()
 {
-	if (VariantSelection == -1 || VariantClasses.Length <= VariantSelection)
+	if (VariantSelection == -1 || VariantList.Length <= VariantSelection)
 	{
 		return ItemPickupClass;
 	}
 
-	return VariantClasses[VariantSelection];
+	return VariantList[VariantSelection].VariantClass;
 }
 
 function class<KFWeapon> GetWeapon()

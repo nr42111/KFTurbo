@@ -1,6 +1,6 @@
 //A rewrite to change how buying custom skins works.
 class KFPBuyMenuSaleList extends SRBuyMenuSaleList
-	config(KFProTrader); //uses config to persist user selection (due to inherent volatility of GUI items)
+	config(KFProTrader); //uses config to persist user selection.
 
 var	Texture	ButtonTexture;
 var	Texture	ButtonHoverTexture;
@@ -12,25 +12,11 @@ var	Texture	StickerSkinTexture;
 var	Texture CamoSkinTexture;
 var Texture LockedDLCTexture;
 
-enum EVariantType
-{
-	Default,
-	
-	//Vanilla KF Skins
-	Gold,
-	Camo,
-	Neon,
-	
-	//Built-in Skins
-	Sticker,
-	Paint,
-	
-	//Custom
-	Custom1,
-	Custom2,
-	Custom3,
-	Custom4
-};
+var ClientPerkRepLink ClientPerkRepLink;	
+var KFPRepLink KFPRepLink;
+
+var String KFTurboBuyMenuSettingsClassString;
+var KFTurboBuyMenuSettings BuyMenuSettings;
 
 struct HoverCacheInfo
 {
@@ -44,8 +30,7 @@ var int MouseOverSubIndex;
 //Used soley to be compliant with how DrawInvItem is implemented.
 struct VariantListContainer
 {
-	var array< class<Pickup> > Variants;
-	var array< byte> VariantStatus;
+	var array<KFTurboRepLinkSettings.VariantWeapon> VariantList;
 	var int Selection;
 };
 var array<VariantListContainer> VariantClasses;
@@ -66,8 +51,49 @@ struct ButtonExtent
 
 var array<ButtonExtent> ItemButtonList;
 
+function ClientPerkRepLink GetClientPerkRepLink()
+{
+	if (ClientPerkRepLink == none)
+	{
+		ClientPerkRepLink = Class'ClientPerkRepLink'.Static.FindStats(PlayerOwner());
+	}
+
+	return ClientPerkRepLink;
+}
+
+function KFPRepLink GetKFPRepLink()
+{
+	if (KFPRepLink == none)
+	{
+		KFPRepLink = class'KFPRepLink'.static.GetKFPRepLink(PlayerOwner().PlayerReplicationInfo);
+	}
+
+	return KFPRepLink;
+}
+
+event Opened(GUIComponent Sender)
+{
+	local class<KFTurboBuyMenuSettings> BuyMenuSettingsClass;
+	if (BuyMenuSettings == none)
+	{
+		BuyMenuSettingsClass = class<KFTurboBuyMenuSettings>(DynamicLoadObject(KFTurboBuyMenuSettingsClassString, class'Class'));
+
+		if (BuyMenuSettingsClass == none)
+		{
+			BuyMenuSettingsClass = class'KFTurboBuyMenuSettings';
+		}
+
+		BuyMenuSettings = new(self) BuyMenuSettingsClass;
+	}
+	
+	ClientPerkRepLink = Class'ClientPerkRepLink'.Static.FindStats(PlayerOwner());
+	KFPRepLink = class'KFPRepLink'.static.GetKFPRepLink(PlayerOwner().PlayerReplicationInfo);
+	Super.Opened(Sender);
+}
+
 event Closed(GUIComponent Sender, bool bCancelled)
 {
+	SaveConfig();
 	Super.Closed(Sender, bCancelled);
 }
 
@@ -80,7 +106,6 @@ function StoreVariantSelection(class<KFWeapon> WeaponClass, int Selection)
 		if (VariantSelection[i].WeaponClass == WeaponClass)
 		{
 			VariantSelection[i].Selection = Selection;
-			SaveConfig();
 			return;
 		}
 	}
@@ -88,7 +113,6 @@ function StoreVariantSelection(class<KFWeapon> WeaponClass, int Selection)
 	VariantSelection.Length = VariantSelection.Length + 1;
 	VariantSelection[VariantSelection.Length - 1].WeaponClass = WeaponClass;
 	VariantSelection[VariantSelection.Length - 1].Selection = Selection;
-	SaveConfig();
 }
 
 function int GetVariantSelection(class<KFWeapon> WeaponClass)
@@ -134,8 +158,6 @@ function UpdateSelectedAlternateSkin(GUIComponent Sender)
 	{
 		return;
 	}
-
-	log(CanBuys[MouseOverIndex]);
 
 	if (CanBuys[MouseOverIndex] < 1)
 	{
@@ -189,7 +211,7 @@ function int GetButtonIndex(optional KFPGUIBuyable Buyable)
 
 		if (ItemButtonList[i].bLocked)
 		{
-			PlayerOwner().SteamStatsAndAchievements.PurchaseWeaponDLC(class<KFWeapon>(Buyable.VariantClasses[i].default.InventoryType).default.AppID);
+			PlayerOwner().SteamStatsAndAchievements.PurchaseWeaponDLC(class<KFWeapon>(Buyable.VariantList[i].VariantClass.default.InventoryType).default.AppID);
 			return -1;
 		}
 
@@ -201,7 +223,7 @@ function int GetButtonIndex(optional KFPGUIBuyable Buyable)
 
 static function bool HasAlternateSkin(KFPGUIBuyable Buyable)
 {
-	if (Buyable == None || Buyable.VariantClasses.Length == 0)
+	if (Buyable == None || Buyable.VariantList.Length == 0)
 	{
 		return false;
 	}
@@ -215,14 +237,12 @@ static function VariantListContainer GetAlternateSkins(KFPGUIBuyable Buyable)
 
 	if (Buyable == None)
 	{
-		VariantContainer.Variants.Length = 0;
-		VariantContainer.VariantStatus.Length = 0;
+		VariantContainer.VariantList.Length = 0;
 		VariantContainer.Selection = -1;
 		return VariantContainer;
 	}
 
-	VariantContainer.Variants = Buyable.VariantClasses;
-	VariantContainer.VariantStatus = Buyable.VariantStatus;
+	VariantContainer.VariantList = Buyable.VariantList;
 	VariantContainer.Selection = Buyable.VariantSelection;
 
 	return VariantContainer;
@@ -244,9 +264,9 @@ function bool PreDraw(Canvas Canvas)
 		}
 		else
 		{
-			if (VariantClasses[MouseOverIndex].Variants.Length > MouseOverSubIndex)
+			if (VariantClasses[MouseOverIndex].VariantList.Length > MouseOverSubIndex)
 			{
-				SetHint(GetButtonHint(VariantClasses[MouseOverIndex].Variants[MouseOverSubIndex]));
+				SetHint(BuyMenuSettings.GetHintForPickup(VariantClasses[MouseOverIndex].VariantList[MouseOverSubIndex].VariantClass));
 			}
 			else
 			{
@@ -265,7 +285,7 @@ function DrawInvItem(Canvas Canvas, int CurIndex, float X, float Y, float Width,
 {
 	Super.DrawInvItem(Canvas, CurIndex, X, Y, Width, Height, bSelected, bPending);
 
-	if (CanBuys[CurIndex] < 2 && VariantClasses[CurIndex].Variants.Length != 0)
+	if (CanBuys[CurIndex] < 2 && VariantClasses[CurIndex].VariantList.Length != 0)
 	{
 		DrawAlternateSkinButtons(Canvas, CurIndex, X, Y, Width, Height, bSelected, bPending);
 	}
@@ -281,9 +301,6 @@ function DrawAlternateSkinButtons(Canvas Canvas, int CurIndex, float X, float Y,
 	local float TempX, TempY;
 	local bool bHovered, bSubButtonHovered;
 	local ButtonExtent ItemButton;
-	local ClientPerkRepLink CPRL;
-
-	CPRL = Class'ClientPerkRepLink'.Static.FindStats(PlayerOwner());
 
 	//Update bounds data to what's relevant to use.
 	//Handle perk icon space
@@ -313,7 +330,7 @@ function DrawAlternateSkinButtons(Canvas Canvas, int CurIndex, float X, float Y,
 	Height -= 12.f;
 	Y += 6.f;
 
-	ButtonSize = FMin(Width / VariantClasses[CurIndex].Variants.Length, Height * 0.7) - 0.05f;
+	ButtonSize = FMin(Width / VariantClasses[CurIndex].VariantList.Length, Height * 0.7) - 0.05f;
 
 	TempX = X + Width;
 	TempY = Y + (Height * 0.5f) - (ButtonSize * 0.5f);
@@ -330,7 +347,7 @@ function DrawAlternateSkinButtons(Canvas Canvas, int CurIndex, float X, float Y,
 		MouseOverSubIndex = -1;
 	}
 
-	for (i = 0; i < VariantClasses[CurIndex].Variants.Length; i++)
+	for (i = 0; i < VariantClasses[CurIndex].VariantList.Length; i++)
 	{
 		TempX -= ButtonSize;
 		Canvas.SetPos(TempX, TempY);
@@ -338,7 +355,7 @@ function DrawAlternateSkinButtons(Canvas Canvas, int CurIndex, float X, float Y,
 
 		if (bHovered)
 		{
-			ItemButton.bLocked = VariantClasses[CurIndex].VariantStatus[i] != 0;
+			ItemButton.bLocked = VariantClasses[CurIndex].VariantList[i].ItemStatus != 0;
 			ItemButton.ButtonLocation[0] = TempX;
 			ItemButton.ButtonLocation[1] = TempY;
 
@@ -357,7 +374,7 @@ function DrawAlternateSkinButtons(Canvas Canvas, int CurIndex, float X, float Y,
 			Canvas.DrawTileStretched(ButtonDisabledTexture, ButtonSize, ButtonSize);
 			Canvas.SetDrawColor(200, 200, 200, 100);
 		}
-		else if (VariantClasses[CurIndex].VariantStatus[i] != 0)
+		else if (VariantClasses[CurIndex].VariantList[i].ItemStatus != 0)
 		{
 			Canvas.DrawTileStretched(ButtonDisabledTexture, ButtonSize, ButtonSize);
 			Canvas.SetDrawColor(200, 200, 200, 100);
@@ -380,12 +397,12 @@ function DrawAlternateSkinButtons(Canvas Canvas, int CurIndex, float X, float Y,
 			Canvas.SetDrawColor(255, 255, 255, 255);
 		}
 
-		if (GetButtonTexture(VariantClasses[CurIndex].Variants[i]) != None)
+		if (BuyMenuSettings.GetIconForPickup(VariantClasses[CurIndex].VariantList[i].VariantClass) != None)
 		{
-			Canvas.DrawRect(GetButtonTexture(VariantClasses[CurIndex].Variants[i]), ButtonSize, ButtonSize);
+			Canvas.DrawRect(BuyMenuSettings.GetIconForPickup(VariantClasses[CurIndex].VariantList[i].VariantClass), ButtonSize, ButtonSize);
 		}
 
-		if (VariantClasses[CurIndex].VariantStatus[i] != 0)
+		if (VariantClasses[CurIndex].VariantList[i].ItemStatus != 0)
 		{
 			Canvas.SetPos(TempX, TempY);
 			Canvas.DrawRect(LockedDLCTexture, ButtonSize, ButtonSize);
@@ -436,7 +453,7 @@ final function KFPGUIBuyable AllocateKFPEntry(ClientPerkRepLink L)
 
 	L.ResetItem(NewBuyable);
 
-	NewBuyable.VariantClasses.Length = 0;
+	NewBuyable.VariantList.Length = 0;
 	NewBuyable.VariantSelection = -1;
 	
 	return NewBuyable;
@@ -461,11 +478,11 @@ function UpdateForSaleBuyables()
 	ForSaleBuyables.Length = 0;
 
 	// Grab the items for sale
-	CPRL = Class'ClientPerkRepLink'.Static.FindStats(PlayerOwner());
+	CPRL = GetClientPerkRepLink();
 	if (CPRL == None)
 		return; // Hmmmm?
 
-	KFPL = class'KFPRepLink'.static.GetKFPRepLink(PlayerOwner().PlayerReplicationInfo);
+	KFPL = GetKFPRepLink();
 
 	KFPRI = KFPlayerReplicationInfo(PlayerOwner().PlayerReplicationInfo);
 
@@ -596,14 +613,14 @@ function UpdateForSaleBuyables()
 
 			if (KFPL != None)
 			{
-				KFPL.GetVariantsForWeapon(ForSalePickup, ForSaleBuyable.VariantClasses, ForSaleBuyable.VariantStatus);
+				KFPL.GetVariantsForWeapon(ForSalePickup, ForSaleBuyable.VariantList);
 			}
 			else
 			{
-				ForSaleBuyable.VariantClasses = ForSalePickup.default.VariantClasses;
+				ForSaleBuyable.VariantList.Length = 0;
 			}
 
-			ForSaleBuyable.VariantSelection = Clamp(GetVariantSelection(ForSaleWeapon), 0, ForSaleBuyable.VariantClasses.Length - 1);
+			ForSaleBuyable.VariantSelection = Clamp(GetVariantSelection(ForSaleWeapon), 0, ForSaleBuyable.VariantList.Length - 1);
 
 			ForSaleBuyable.ItemWeight = ForSaleWeapon.default.Weight;
 			if (DualDivider == 2)
@@ -649,7 +666,7 @@ function UpdateList()
 	local int i, j;
 	local ClientPerkRepLink CPRL;
 
-	CPRL = Class'ClientPerkRepLink'.Static.FindStats(PlayerOwner());
+	CPRL = GetClientPerkRepLink();
 
 	// Update the ItemCount and select the first item
 	ItemCount = CPRL.ShopCategories.Length + ForSaleBuyables.Length + 1;
@@ -705,7 +722,7 @@ function UpdateList()
 	for (i = 0; i < ForSaleBuyables.Length; i++)
 	{
 		PrimaryStrings[j] = ForSaleBuyables[i].ItemName;
-		SecondaryStrings[j] = "£" @ int(ForSaleBuyables[i].ItemCost);
+		SecondaryStrings[j] = "ï¿½" @ int(ForSaleBuyables[i].ItemCost);
 
 		VariantClasses[j] = GetAlternateSkins(KFPGUIBuyable(ForSaleBuyables[i]));
 
@@ -760,79 +777,25 @@ function UpdateList()
 	bNeedsUpdate = false;
 }
 
-static final function EVariantType GetVariantType(class<Pickup> PickupClass)
-{
-	switch (PickupClass)
-	{
-	case class 'W_Flamethrower_Pick_G' :
-	case class 'W_Deagle_Pickup_G' :
-	case class 'W_DualDeagle_Pickup_G' :
-		return Gold; //TODO: maybe just rename these so they're compliant with our default naming scheme?
-	}
-
-	//Migrating to a generic naming scheme so that we don't need to maintain multiple lists of skins whenever we add new ones.
-	//TODO: Leverage the KFPRepLink so we can specify all of this from within there (would allow for server configuration of icons)
-	if (IsGenericGoldSkin(PickupClass))
-	{
-		return Gold;
-	}
-
-	if (IsGenericCamoSkin(PickupClass))
-	{
-		return Camo;
-	}
-
-	if (IsGenericVariantSkin(PickupClass))
-	{
-		return Sticker;
-	}
-
-	return Default;
-}
-
-static final function bool IsGenericGoldSkin(class<Pickup> PickupClass)
-{
-	return InStr(Caps(PickupClass), "_GOLD_") != -1;
-}
-
-static final function bool IsGenericCamoSkin(class<Pickup> PickupClass)
-{
-	return InStr(Caps(PickupClass), "_CAMO_") != -1;
-}
-
-static final function bool IsGenericVariantSkin(class<Pickup> PickupClass)
-{
-	return InStr(Caps(PickupClass), "W_V_") != -1; //If we contain the variant naming scheme in our class name, assume we are some sort of variant skin.
-}
-
-static final function Texture GetButtonTexture(class<Pickup> PickupClass)
-{
-	return class'KFPRepLink'.static.GetIconForPickup(PickupClass);
-}
-
-static final function string GetButtonHint(class<Pickup> PickupClass)
-{
-	return class'KFPRepLink'.static.GetHintForPickup(PickupClass);
-}
-
 defaultproperties
 {
-     ButtonTexture=Texture'KF_InterfaceArt_tex.Menu.Button'
-     ButtonHoverTexture=Texture'KF_InterfaceArt_tex.Menu.button_Highlight'
-     ButtonDisabledTexture=Texture'KF_InterfaceArt_tex.Menu.button_Disabled'
-     NoSkinTexture=Texture'KFTurbo.HUD.NoSkinIcon_D'
-     GoldSkinTexture=Texture'KFTurbo.HUD.GoldIcon_D'
-     StickerSkinTexture=Texture'KFTurbo.HUD.StickerIcon_D'
-     CamoSkinTexture=Texture'KFTurbo.HUD.CamoIcon_D'
-     LockedDLCTexture=Texture'KFTurbo.HUD.DLCLocked_D'
-     HoverCache=(LastKnownMouseOverIndex=-1,LastKnownMouseOverSubIndex=-1)
-     MouseOverSubIndex=-1
-     Begin Object Class=GUIToolTip Name=GUIListVariantToolTip
-         bTrackMouse=True
-         bTrackInput=False
-         InitialDelay=0.000000
-         ExpirationSeconds=0.000000
-     End Object
-     ToolTip=GUIToolTip'KFTurbo.KFPBuyMenuSaleList.GUIListVariantToolTip'
+	ButtonTexture=Texture'KF_InterfaceArt_tex.Menu.Button'
+	ButtonHoverTexture=Texture'KF_InterfaceArt_tex.Menu.button_Highlight'
+	ButtonDisabledTexture=Texture'KF_InterfaceArt_tex.Menu.button_Disabled'
+	NoSkinTexture=Texture'KFTurbo.HUD.NoSkinIcon_D'
+	GoldSkinTexture=Texture'KFTurbo.HUD.GoldIcon_D'
+	StickerSkinTexture=Texture'KFTurbo.HUD.StickerIcon_D'
+	CamoSkinTexture=Texture'KFTurbo.HUD.CamoIcon_D'
+	LockedDLCTexture=Texture'KFTurbo.HUD.DLCLocked_D'
+	HoverCache=(LastKnownMouseOverIndex=-1,LastKnownMouseOverSubIndex=-1)
+	MouseOverSubIndex=-1
+	Begin Object Class=GUIToolTip Name=GUIListVariantToolTip
+		bTrackMouse=True
+		bTrackInput=False
+		InitialDelay=0.000000
+		ExpirationSeconds=0.000000
+	End Object
+	ToolTip=GUIToolTip'KFTurbo.KFPBuyMenuSaleList.GUIListVariantToolTip'
 
+	KFTurboBuyMenuSettingsClassString="KFTurbo.KFTurboBuyMenuSettings"
 }

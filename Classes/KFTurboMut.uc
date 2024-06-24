@@ -1,5 +1,6 @@
 //Core of the KFTurbo mod. Needed for UI changes (as well as some other functionality).
-class KFTurboMut extends Mutator;
+class KFTurboMut extends Mutator
+	config(KFPro);
 
 #exec obj load file="..\Animations\KFTurboContent.ukx" package=KFTurbo
 
@@ -8,10 +9,12 @@ var array<KFGameType.SpecialSquad> ShortSpecialSquads;		// The special squad arr
 var array<KFGameType.SpecialSquad> NormalSpecialSquads;	// The special squad array for a normal game
 var array<KFGameType.SpecialSquad> LongSpecialSquads;		// The special squad array for a long game
 
-var array<PlayerController> PendingPlayers;
-
 var KFPClassyGorefastHandler ClassyGorefastHandler;
 var KFPRepLinkHandler RepLinkHandler;
+
+var config String RepLinkSettingsClassString;
+var class<KFTurboRepLinkSettings> RepLinkSettingsClass;
+var KFTurboRepLinkSettings RepLinkSettings;
 
 simulated function PostBeginPlay()
 {
@@ -31,6 +34,8 @@ simulated function PostBeginPlay()
 
 		//Every 5 seconds check if our queued spawn has a replaceable zed.
 		ClassyGorefastHandler = Spawn(class'KFPClassyGorefastHandler', self);
+
+		//Manages the creation of KFPRepLink for players joining.
 		RepLinkHandler = Spawn(class'KFPRepLinkHandler', self);
 	}
 }
@@ -88,6 +93,25 @@ static final function UpdateSpecialSquadList(out array<KFGameType.SpecialSquad> 
 	}
 }
 
+//Called every time a ServerStStats is made (but we only want to do this once).
+function InitializeKFPRepLinkSettings()
+{
+	if (RepLinkSettings != none)
+	{
+		return;
+	}
+
+	RepLinkSettingsClass = class<KFTurboRepLinkSettings>(DynamicLoadObject(RepLinkSettingsClassString, class'Class'));
+
+	if (RepLinkSettingsClass == none)
+	{
+		RepLinkSettingsClass = class'KFTurboRepLinkSettings';
+	}
+
+	RepLinkSettings = new(self) RepLinkSettingsClass;
+	RepLinkSettings.Initialize();
+}
+
 function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
 {
 	if (KFRandomItemSpawn(Other) != None)
@@ -97,6 +121,7 @@ function bool CheckReplacement(Actor Other, out byte bSuperRelevant)
 
 	if (RepLinkHandler != none && ServerStStats(Other) != None)
 	{
+		InitializeKFPRepLinkSettings();
 		RepLinkHandler.OnServerStatsAdded(ServerStStats(Other));
 	}
 
@@ -158,22 +183,22 @@ function GetServerDetails(out GameInfo.ServerResponseLine ServerState)
 
 defaultproperties
 {
-     FinalSquads(0)=(ZedClass=("KFTurbo.P_Clot_STA"),NumZeds=(4))
-     FinalSquads(1)=(ZedClass=("KFTurbo.P_Clot_STA","KFTurbo.P_Crawler_STA"),NumZeds=(3,1))
-     FinalSquads(2)=(ZedClass=("KFTurbo.P_Clot_STA","KFTurbo.P_Stalker_STA","KFTurbo.P_Crawler_STA"),NumZeds=(3,1,1))
-     ShortSpecialSquads(2)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,1))
-     ShortSpecialSquads(3)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,2))
-     NormalSpecialSquads(3)=(ZedClass=("KFTurbo.P_FP_HAL"),NumZeds=(1))
-     NormalSpecialSquads(4)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_FP_STA"),NumZeds=(1,1,1))
-     NormalSpecialSquads(5)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,1))
-     NormalSpecialSquads(6)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,2))
-     LongSpecialSquads(4)=(ZedClass=("KFTurbo.P_Crawler_STA","KFTurbo.P_Gorefast_XMA","KFTurbo.P_Stalker_STA","KFTurbo.P_SC_HAL"),NumZeds=(2,2,1,1))
-     LongSpecialSquads(6)=(ZedClass=("KFTurbo.P_FP_HAL"),NumZeds=(1))
-     LongSpecialSquads(7)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_FP_STA"),NumZeds=(1,1,1))
-     LongSpecialSquads(8)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,1))
-     LongSpecialSquads(9)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,2))
-     bAddToServerPackages=True
-     GroupName="KF-KFTurboMut"
-     FriendlyName="Killing Floor Turbo Mut"
-     Description="Mutator for KFTurbo."
+	FinalSquads(0)=(ZedClass=("KFTurbo.P_Clot_STA"),NumZeds=(4))
+	FinalSquads(1)=(ZedClass=("KFTurbo.P_Clot_STA","KFTurbo.P_Crawler_STA"),NumZeds=(3,1))
+	FinalSquads(2)=(ZedClass=("KFTurbo.P_Clot_STA","KFTurbo.P_Stalker_STA","KFTurbo.P_Crawler_STA"),NumZeds=(3,1,1))
+	ShortSpecialSquads(2)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,1))
+	ShortSpecialSquads(3)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,2))
+	NormalSpecialSquads(3)=(ZedClass=("KFTurbo.P_FP_HAL"),NumZeds=(1))
+	NormalSpecialSquads(4)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_FP_STA"),NumZeds=(1,1,1))
+	NormalSpecialSquads(5)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,1))
+	NormalSpecialSquads(6)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,2))
+	LongSpecialSquads(4)=(ZedClass=("KFTurbo.P_Crawler_STA","KFTurbo.P_Gorefast_XMA","KFTurbo.P_Stalker_STA","KFTurbo.P_SC_HAL"),NumZeds=(2,2,1,1))
+	LongSpecialSquads(6)=(ZedClass=("KFTurbo.P_FP_HAL"),NumZeds=(1))
+	LongSpecialSquads(7)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_FP_STA"),NumZeds=(1,1,1))
+	LongSpecialSquads(8)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,1))
+	LongSpecialSquads(9)=(ZedClass=("KFTurbo.P_Bloat_STA","KFTurbo.P_Siren_STA","KFTurbo.P_SC_STA","KFTurbo.P_FP_STA"),NumZeds=(1,2,1,2))
+	bAddToServerPackages=True
+	GroupName="KF-KFTurboMut"
+	FriendlyName="Killing Floor Turbo Mut"
+	Description="Mutator for KFTurbo."
 }

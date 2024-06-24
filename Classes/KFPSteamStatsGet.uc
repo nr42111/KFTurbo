@@ -9,58 +9,59 @@ simulated event PostBeginPlay()
 	Initialize(PCOwner);
 	GetStatsAndAchievements();
 }
+
 simulated event PostNetBeginPlay();
 
 simulated event OnStatsAndAchievementsReady()
 {
-	local int WeaponIndex, VariantIndex, i;
+	local int WeaponIndex, VariantIndex, WeaponLockID;
 	local class<KFWeapon> WeaponClass;
 
 	InitStatInt(OwnedWeaponDLC, GetOwnedWeaponDLC());
 
 	for (WeaponIndex = Link.PlayerVariantList.Length - 1; WeaponIndex >= 0; --WeaponIndex)
 	{
-		for (VariantIndex = Link.PlayerVariantList[WeaponIndex].VariantClasses.Length - 1; VariantIndex >= 0; --VariantIndex)
+		for (VariantIndex = Link.PlayerVariantList[WeaponIndex].VariantList.Length - 1; VariantIndex >= 0; --VariantIndex)
 		{
-			WeaponClass = class<KFWeapon>(Link.PlayerVariantList[WeaponIndex].VariantClasses[VariantIndex].Default.InventoryType);
+			WeaponClass = class<KFWeapon>(Link.PlayerVariantList[WeaponIndex].VariantList[VariantIndex].VariantClass.default.InventoryType);
 
-			i = WeaponClass.default.AppID;
-
-			if (i != 0)
+			//Test DLC status.
+			WeaponLockID = WeaponClass.default.AppID;
+			if (WeaponLockID != 0)
 			{
-				if (PlayerOwnsWeaponDLC(i))
+				if (PlayerOwnsWeaponDLC(WeaponLockID))
 				{
-					Link.PlayerVariantList[WeaponIndex].VariantStatus[VariantIndex] = 0;
+					Link.PlayerVariantList[WeaponIndex].VariantList[VariantIndex].ItemStatus = 0;
 				}
 				else if (WeaponClass.default.UnlockedByAchievement != -1)
 				{
-					Link.PlayerVariantList[WeaponIndex].VariantStatus[VariantIndex] = 2;
+					Link.PlayerVariantList[WeaponIndex].VariantList[VariantIndex].ItemStatus = 2;
 				}
 				else
 				{
-					Link.PlayerVariantList[WeaponIndex].VariantStatus[VariantIndex] = 1;
+					Link.PlayerVariantList[WeaponIndex].VariantList[VariantIndex].ItemStatus = 1;
 				}
 
 				continue;
 			}
-
-			i = WeaponClass.default.UnlockedByAchievement;
-
-			if (i != -1)
+			
+			//Test achievement status.
+			WeaponLockID = WeaponClass.default.UnlockedByAchievement;
+			if (WeaponLockID != -1)
 			{
-				if (Achievements[i].bCompleted == 1)
+				if (Achievements[WeaponLockID].bCompleted == 1)
 				{
-					Link.PlayerVariantList[WeaponIndex].VariantStatus[VariantIndex] = 0;
+					Link.PlayerVariantList[WeaponIndex].VariantList[VariantIndex].ItemStatus = 0;
 				}
 				else
 				{
-					Link.PlayerVariantList[WeaponIndex].VariantStatus[VariantIndex] = 2;
+					Link.PlayerVariantList[WeaponIndex].VariantList[VariantIndex].ItemStatus = 2;
 				}
 
 				continue;
 			}
 
-			Link.PlayerVariantList[WeaponIndex].VariantStatus[VariantIndex] = 0;
+			Link.PlayerVariantList[WeaponIndex].VariantList[VariantIndex].ItemStatus = 0;
 		}
 	}
 
@@ -68,7 +69,7 @@ simulated event OnStatsAndAchievementsReady()
 
 	UpdatePerkStats();
 
-	Destroy();
+	LifeSpan = 1.f;
 }
 
 //Since we don't push these anymore, we need to do so now.
@@ -113,6 +114,6 @@ simulated function UpdatePerkStats()
 
 defaultproperties
 {
-     RemoteRole=ROLE_None
-     LifeSpan=10.000000
+	RemoteRole=ROLE_None
+	LifeSpan=10.000000
 }

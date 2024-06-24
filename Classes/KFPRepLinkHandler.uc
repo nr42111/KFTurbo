@@ -1,6 +1,13 @@
 class KFPRepLinkHandler extends Actor;
 
+var KFTurboMut KFTurboMutator;
 var array<ServerStStats> PendingReplicationLinkList;
+
+event PostBeginPlay()
+{
+    KFTurboMutator = KFTurboMut(Owner);
+    Super.PostBeginPlay();
+}
 
 function OnServerStatsAdded(ServerStStats Stats)
 {
@@ -35,6 +42,7 @@ function Timer()
         if (LastLinkedReplicationInfo == none)
         {
             NewRepLink = Spawn(class'KFPRepLink', CurrentPlayerController);
+            NewRepLink.KFTurboMutator = KFTurboMutator;
             NewRepLink.OwningController = CurrentPlayerController;
             NewRepLink.OwningReplicationInfo = KFPlayerReplicationInfo(CurrentPlayerController.PlayerReplicationInfo);
 
@@ -49,6 +57,7 @@ function Timer()
             }
 
             NewRepLink = Spawn(class'KFPRepLink', CurrentPlayerController);
+            NewRepLink.KFTurboMutator = KFTurboMutator;
             NewRepLink.OwningController = CurrentPlayerController;
             NewRepLink.OwningReplicationInfo = KFPlayerReplicationInfo(CurrentPlayerController.PlayerReplicationInfo);
 
