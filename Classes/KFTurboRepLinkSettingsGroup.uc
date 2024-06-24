@@ -1,5 +1,6 @@
 //Instance of a group for the usage of informing a KFPRepLink about unlocks for a given group of players.
-class KFTurboRepLinkSettingsGroup extends Object;
+class KFTurboRepLinkSettingsGroup extends Object
+    editinlinenew;
 
 var() string GroupID;
 var() string DisplayName;

@@ -1,8 +1,8 @@
 class KFTurboRepLinkSettings extends Object;
 
 //User and Group configuration.
-var array<KFTurboRepLinkSettingsUser> UserList;
-var array<KFTurboRepLinkSettingsGroup> GroupList;
+var editinline array<KFTurboRepLinkSettingsUser> UserList;
+var editinline array<KFTurboRepLinkSettingsGroup> GroupList;
 
 //Mutator context.
 var ServerPerksMut ServerPerksMut;
@@ -62,12 +62,12 @@ function GetPlayerVariantIDList(String PlayerSteamID, out array<String> PlayerVa
         {
             for (GroupIndex = 0; GroupIndex < GroupList.Length; GroupIndex++)
             {
-                if (GroupIDList[GroupIDIndex] != GroupList[GroupIndex].GroupID)
+                GroupObject = GroupList[GroupIndex];
+
+                if (!GroupList[GroupIndex].bDefaultGroup && GroupIDList[GroupIndex] != GroupList[GroupIndex].GroupID)
                 {
                     continue;
                 }
-
-                GroupObject = GroupList[GroupIndex];
 
                 for (GroupVariantIDIndex = 0; GroupVariantIDIndex < GroupObject.VariantIDList.Length; GroupVariantIDIndex++)
                 {
@@ -248,4 +248,17 @@ defaultproperties
     ScuddlesVariantID = "SCUD"
     CubicVariantID = "CUBIC"
     SMPVariantID = "SHOWME"
+
+    //Default group that gives all players access to a set weapon skins.
+    Begin Object Class=KFTurboRepLinkSettingsGroup Name=RepLinkDefaultGroup
+        DisplayName="DefaultGroup"
+        bDefaultGroup=true
+        VariantIDList(0)=default.GoldVariantID
+        VariantIDList(1)=default.CamoVariantID
+        VariantIDList(2)=default.TurboVariantID
+        VariantIDList(3)=default.VMVariantID
+        VariantIDList(4)=default.WLVariantID
+    End Object
+    GroupList(0)=KFTurboRepLinkSettingsGroup'KFTurbo.KFTurboRepLinkSettings.RepLinkDefaultGroup'
+
 }
