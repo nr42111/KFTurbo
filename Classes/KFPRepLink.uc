@@ -73,7 +73,7 @@ simulated function InitializeRepSetup()
 function SetupPlayerInfo()
 {
     PlayerID = OwningController.GetPlayerIDHash();
-    KFTurboMutator.RepLinkSettings.GetPlayerVariantData(PlayerID, PlayerVariantList);
+    KFTurboMutator.RepLinkSettings.GeneratePlayerVariantData(PlayerID, PlayerVariantList);
 }
 
 simulated function GenerateVariantStatus()
@@ -110,7 +110,12 @@ simulated function DebugVariantInfo(bool bFilterStatus)
             VariantSet = VariantSet $ " | " $ j $ ": " $ PlayerVariantList[i].VariantList[j].VariantClass $ " (" $ PlayerVariantList[i].VariantList[j].ItemStatus $ ")";
         }
 
-        log(VariantSet);
+        log(VariantSet, 'KFTurbo');
+    }
+
+    if (PlayerVariantList.Length == 0)
+    {
+        log("WARNING: PlayerVariantList was empty!", 'KFTurbo');
     }
 }
 

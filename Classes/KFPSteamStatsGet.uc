@@ -65,7 +65,7 @@ simulated event OnStatsAndAchievementsReady()
 		}
 	}
 
-	Link.DebugVariantInfo(false);
+	//Link.DebugVariantInfo(false);
 
 	UpdatePerkStats();
 
