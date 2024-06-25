@@ -4,5 +4,5 @@ class W_M7A3M_DT extends DamTypeM7A3M
 defaultproperties
 {
      HeadShotDamageMult=2.250000
-     WeaponClass=None
+     WeaponClass=class'KFTurbo.W_M7A3M_Weap'
 }
