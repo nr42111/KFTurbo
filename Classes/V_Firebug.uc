@@ -39,9 +39,9 @@ static function int GetPerkProgressInt(ClientPerkRepLink StatOther, out int Fina
 	return Min(StatOther.RFlameThrowerDamageStat + StatOther.GetCustomValueInt(class'VP_FlamethrowerDamage'), FinalInt);
 }
 
-static function float GetMagCapacityMod(KFPlayerReplicationInfo KFPRI, KFWeapon Other) //this definitely does not change mac10 ammo capacity
+static function float GetMagCapacityMod(KFPlayerReplicationInfo KFPRI, KFWeapon Other)
 {
-	if (Flamethrower(Other) != None || MAC10MP(Other) != None) //did you mean || isntead of &&?
+	if (Flamethrower(Other) != None || MAC10MP(Other) != None)
 		return LerpStat(KFPRI, 1.f, 1.6f);
 	return 1.0;
 }
