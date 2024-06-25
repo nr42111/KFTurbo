@@ -24,6 +24,15 @@ function TakeDamage(int Damage, Pawn InstigatedBy, Vector HitLocation, Vector Mo
 	if (Role == ROLE_Authority)
 	{
 		class'PawnHelper'.static.TakeDamage(Damage, InstigatedBy, HitLocation, Momentum, DamageType, HitIndex, AfflictionData);
+
+        if ( Level.Game.GameDifficulty >= 5.0  && (class<DamTypeFlareProjectileImpact>(damageType) != none) )
+        {
+            Damage *= 0.75; // flare impact damage reduction
+        }
+        if ( Level.Game.GameDifficulty >= 5.0  && (class<DamTypeFlareRevolver>(damageType) != none) )
+        {
+            Damage *= 0.75; // flare explosion damage reduction
+        }
 	}
 
 	Super.TakeDamage(Damage, InstigatedBy, HitLocation, Momentum, DamageType, HitIndex);

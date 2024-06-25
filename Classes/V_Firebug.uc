@@ -39,9 +39,9 @@ static function int GetPerkProgressInt(ClientPerkRepLink StatOther, out int Fina
 	return Min(StatOther.RFlameThrowerDamageStat + StatOther.GetCustomValueInt(class'VP_FlamethrowerDamage'), FinalInt);
 }
 
-static function float GetMagCapacityMod(KFPlayerReplicationInfo KFPRI, KFWeapon Other)
+static function float GetMagCapacityMod(KFPlayerReplicationInfo KFPRI, KFWeapon Other) //this definitely does not change mac10 ammo capacity
 {
-	if (Flamethrower(Other) != None && MAC10MP(Other) != None)
+	if (Flamethrower(Other) != None || MAC10MP(Other) != None) //did you mean || isntead of &&?
 		return LerpStat(KFPRI, 1.f, 1.6f);
 	return 1.0;
 }
@@ -64,7 +64,8 @@ static function int AddDamage(KFPlayerReplicationInfo KFPRI, KFMonster Injured, 
 {
 	switch (DmgType)
 	{
-	case class'DamTypeMAC10MPInc' :
+	case class'W_MAC10_DT' :
+	case class'DamTypeTrenchgun' :
 		return float(InDamage) * Lerp(KFPRI.ClientVeteranSkillLevel, 1.f, 1.15, true);
 	}
 
@@ -121,9 +122,9 @@ static function float GetCostScaling(KFPlayerReplicationInfo KFPRI, class<Pickup
 	switch (Item)
 	{
 	case class'W_FlameThrower_Pick' :
-	case class'MAC10Pickup' :
-	case class'HuskGunPickup' :
-	case class'TrenchgunPickup' :
+	case class'W_MAC10_Pickup' :
+	case class'W_Huskgun_Pickup' :
+	case class'W_Trenchgun_Pickup' :
 	case class'FlareRevolverPickup' :
 	case class'DualFlareRevolverPickup' :
 		return LerpStat(KFPRI, 0.9f, 0.3f);
@@ -134,20 +135,12 @@ static function float GetCostScaling(KFPlayerReplicationInfo KFPRI, class<Pickup
 
 static function AddDefaultInventory(KFPlayerReplicationInfo KFPRI, Pawn P)
 {
-	switch(KFPRI.ClientVeteranSkillLevel)
-	{
-	case 5:
-		KFHumanPawn(P).CreateInventoryVeterancy(string(class'KFMod.MAC10MP'), default.StartingWeaponSellPriceLevel5);
-		break;
-	case 6:
-		KFHumanPawn(P).CreateInventoryVeterancy(string(class'W_FlameThrower_Weap'), default.StartingWeaponSellPriceLevel5);
-		break;
-	}
+		KFHumanPawn(P).CreateInventoryVeterancy(string(class'KFTurbo.W_MAC10_Weap'), default.StartingWeaponSellPriceLevel6);
 }
 
 static function class<DamageType> GetMAC10DamageType(KFPlayerReplicationInfo KFPRI)
 {
-	return class'DamTypeMAC10MPInc';
+	return class'W_MAC10_DT';
 }
 
 static function string GetCustomLevelInfo(byte Level)

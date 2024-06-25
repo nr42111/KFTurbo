@@ -1,6 +1,7 @@
 class V_Commando extends SRVetCommando
 	abstract;
 
+
 static function AddCustomStats(ClientPerkRepLink Other)
 {
 	Super.AddCustomStats(Other);
@@ -210,6 +211,8 @@ static function int AddDamage(KFPlayerReplicationInfo KFPRI, KFMonster Injured, 
 	case class'W_FNFAL_DT' :
 	case class'W_ThompsonDrum_DT' :
 		return float(InDamage) * LerpStat(KFPRI, 1.05f, 1.5f);
+	case class'W_MAC10_DT' :
+		return float(InDamage) * LerpStat(KFPRI, 1.05f, 1.15f);
 	}
 
 	return InDamage;
@@ -221,7 +224,7 @@ static function float ModifyRecoilSpread(KFPlayerReplicationInfo KFPRI, WeaponFi
 		SCARMK17AssaultRifle(Other.Weapon) != none || M4AssaultRifle(Other.Weapon) != none
 		|| FNFAL_ACOG_AssaultRifle(Other.Weapon) != none || MKb42AssaultRifle(Other.Weapon) != none
 		|| ThompsonSMG(Other.Weapon) != none || ThompsonDrumSMG(Other.Weapon) != none
-		|| SPThompsonSMG(Other.Weapon) != none)
+		|| SPThompsonSMG(Other.Weapon) != none || MAC10MP(Other.Weapon) != none)
 	{
 		Recoil = LerpStat(KFPRI, 0.95f, 0.6f);
 		return Recoil;

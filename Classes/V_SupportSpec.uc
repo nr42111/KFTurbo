@@ -82,6 +82,7 @@ static function float AddExtraAmmoFor(KFPlayerReplicationInfo KFPRI, Class<Ammun
 	case class'W_Boomstick_Ammo' :
 	case class'W_KSG_Ammo' :
 	case class'W_Shotgun_Ammo' :
+	case class'TrenchgunAmmo' :
 	case class'W_SPShotgun_Ammo' :
 		Multiplier = LerpStat(KFPRI, 1.f, 1.3f);
 		break;
@@ -125,6 +126,7 @@ static function int AddDamage(KFPlayerReplicationInfo KFPRI, KFMonster Injured, 
 	case class'DamTypeAA12Shotgun' :
 	case class'DamTypeBenelli' :
 	case class'DamTypeKSGShotgun' :
+	case class'DamTypeTrenchgun' :
 	case class'DamTypeSPShotgun' :
 		return float(InDamage) * LerpStat(KFPRI, 1.1f, 1.6f);
 	case class'DamTypeFrag' :
