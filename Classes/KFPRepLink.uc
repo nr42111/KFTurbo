@@ -15,6 +15,7 @@ var int VariantIndex;
 
 var int FailureCount;
 var bool bHasPerformedSetup;
+var bool bHasPerformedVariantStatusUpdate;
 
 replication
 {
@@ -26,11 +27,6 @@ state RepSetup
 {
 Begin:
     if (Level.NetMode == NM_Client)
-    {
-        Stop;
-    }
-
-    if (bHasPerformedSetup)
     {
         Stop;
     }
@@ -53,7 +49,7 @@ Begin:
 
     if (NetConnection(OwningController.Player) == None)
     {
-        GenerateVariantStatus();
+        UpdateVariantStatus();
         Stop;
     }
 
@@ -78,7 +74,7 @@ simulated function InitializeRepSetup()
 
 function SetupPlayerInfo()
 {
-    if (!bHasPerformedSetup)
+    if (bHasPerformedSetup)
     {
         return;
     }
@@ -89,18 +85,14 @@ function SetupPlayerInfo()
     KFTurboMutator.RepLinkSettings.GeneratePlayerVariantData(PlayerID, PlayerVariantList);
 }
 
-simulated function GenerateVariantStatus()
+simulated function UpdateVariantStatus()
 {
-    local int i, j;
-
-    for (i = 0; i < PlayerVariantList.Length; i++)
+    if (bHasPerformedVariantStatusUpdate)
     {
-        for (j = 0; j < PlayerVariantList[i].VariantList.Length; j++)
-        {
-            PlayerVariantList[i].VariantList[j].ItemStatus = 255;
-        }
+        return;
     }
 
+    bHasPerformedVariantStatusUpdate = true;
     Spawn(Class'KFPSteamStatsGet', Owner).Link = Self;
 }
 
@@ -156,7 +148,7 @@ simulated function Client_Reliable_SendVariant(class<KFWeaponPickup> Pickup, KFT
 
 simulated function Client_Reliable_SendComplete()
 {
-    GenerateVariantStatus();
+    UpdateVariantStatus();
 }
 
 simulated function GetVariantsForWeapon(class<KFWeaponPickup> Pickup, out array<KFTurboRepLinkSettings.VariantWeapon> VariantList)
@@ -209,5 +201,6 @@ defaultproperties
     bOnlyRelevantToOwner=True
     bAlwaysRelevant=False
 
-    bHasPerformedSetup=true
+    bHasPerformedSetup=false
+    bHasPerformedVariantStatusUpdate=false
 }

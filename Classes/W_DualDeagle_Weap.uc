@@ -2,7 +2,7 @@ class W_DualDeagle_Weap extends DualDeagle;
 
 function bool HandlePickupQuery( pickup Item )
 {
-	if ( Item.InventoryType==Class'W_Deagle_Weap' || Item.InventoryType==Class'W_Deagle_Weap_G' )
+	if ( Item.InventoryType==Class'W_Deagle_Weap' || Item.InventoryType==Class'W_V_Deagle_Gold_Weap' )
 	{
 		if( LastHasGunMsgTime < Level.TimeSeconds && PlayerController(Instigator.Controller) != none )
 		{

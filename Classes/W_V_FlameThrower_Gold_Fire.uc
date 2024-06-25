@@ -1,4 +1,4 @@
-class W_Flamethrower_Fire_G extends GoldenFlameBurstFire;
+class W_V_Flamethrower_Gold_Fire extends GoldenFlameBurstFire;
 
 defaultproperties
 {

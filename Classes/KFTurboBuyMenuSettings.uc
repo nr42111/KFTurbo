@@ -26,10 +26,10 @@ function Texture GetIconForPickup(class<Pickup> PickupClass)
         return Texture'KFTurbo.HUD.NoSkinIcon_D';
 
     //Gold weapon
-    case class'W_FlameThrower_Pick_G' :
+    case class'W_V_FlameThrower_Gold_Pickup' :
     case class'W_V_AK47_Gold_Pickup' :
-    case class'W_Deagle_Pickup_G' :
-    case class'W_DualDeagle_Pickup_G' :
+    case class'W_V_Deagle_Gold_Pickup' :
+    case class'W_V_DualDeagle_Gold_Pickup' :
     case class'W_V_Katana_Gold_Pickup' :
     case class'W_V_Benelli_Gold_Pickup' :
         return Texture'KFTurbo.HUD.GoldIcon_D';
@@ -99,10 +99,10 @@ function String GetHintForPickup(class<Pickup> PickupClass)
         return "Default";
 
     //Gold weapon
-    case class'W_FlameThrower_Pick_G' :
+    case class'W_V_FlameThrower_Gold_Pickup' :
     case class'W_V_AK47_Gold_Pickup' :
-    case class'W_Deagle_Pickup_G' :
-    case class'W_DualDeagle_Pickup_G' :
+    case class'W_V_Deagle_Gold_Pickup' :
+    case class'W_V_DualDeagle_Gold_Pickup' :
     case class'W_V_Katana_Gold_Pickup' :
     case class'W_V_Benelli_Gold_Pickup' :
         return "Gold";

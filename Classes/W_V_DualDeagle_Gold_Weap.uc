@@ -1,4 +1,4 @@
-class W_DualDeagle_Weap_G extends GoldenDualDeagle;
+class W_V_DualDeagle_Gold_Weap extends GoldenDualDeagle;
 
 function GiveTo( pawn Other, optional Pickup Pickup )
 {
@@ -37,7 +37,7 @@ function GiveTo( pawn Other, optional Pickup Pickup )
 	}
 	else
 	{
-		MagAmmoRemaining = Clamp(MagAmmoRemaining + Class'W_Deagle_Weap_G'.Default.MagCapacity, 0, MagCapacity);
+		MagAmmoRemaining = Clamp(MagAmmoRemaining + Class'W_V_DualDeagle_Gold_Weap'.Default.MagCapacity, 0, MagCapacity);
 	}
 
 	Super(Weapon).GiveTo(Other, Pickup);
@@ -75,14 +75,14 @@ function DropFrom(vector StartLocation)
 	{
 		OtherAmmo = AmmoThrown / 2;
 		AmmoThrown -= OtherAmmo;
-		I = Spawn(Class'W_Deagle_Weap_G');
+		I = Spawn(Class'W_V_Deagle_Gold_Weap');
 		I.GiveTo(Instigator);
 		Weapon(I).Ammo[0].AmmoAmount = OtherAmmo;
 		GoldenDeagle(I).MagAmmoRemaining = MagAmmoRemaining / 2;
 		MagAmmoRemaining = Max(MagAmmoRemaining-GoldenDeagle(I).MagAmmoRemaining,0);
 	}
 
-	Pickup = Spawn(Class'W_Deagle_Pickup_G',,, StartLocation);
+	Pickup = Spawn(Class'W_V_Deagle_Gold_Pickup',,, StartLocation);
 
 	if ( Pickup != None )
 	{
@@ -101,7 +101,7 @@ function DropFrom(vector StartLocation)
 
 simulated function bool PutDown()
 {
-	if ( Instigator.PendingWeapon.class == class'W_Deagle_Weap_G' )
+	if ( Instigator.PendingWeapon.class == class'W_V_Deagle_Gold_Weap' )
 	{
 		bIsReloading = false;
 	}
@@ -111,7 +111,7 @@ simulated function bool PutDown()
 
 defaultproperties
 {
-     FireModeClass(0)=Class'KFTurbo.W_DualDeagle_Fire_G'
-     DemoReplacement=Class'KFTurbo.W_Deagle_Weap_G'
-     PickupClass=Class'KFTurbo.W_DualDeagle_Pickup_G'
+     FireModeClass(0)=Class'KFTurbo.W_V_Deagle_Gold_Fire'
+     DemoReplacement=Class'KFTurbo.W_V_Deagle_Gold_Weap'
+     PickupClass=Class'KFTurbo.W_V_Deagle_Gold_Pickup'
 }

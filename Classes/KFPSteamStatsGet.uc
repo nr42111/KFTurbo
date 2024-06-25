@@ -8,6 +8,7 @@ simulated event PostBeginPlay()
 	PCOwner = Level.GetLocalPlayerController();
 	Initialize(PCOwner);
 	GetStatsAndAchievements();
+	log("Called GetStatsAndAchievements", 'KFTurbo');
 }
 
 simulated event PostNetBeginPlay();
@@ -16,6 +17,7 @@ simulated event OnStatsAndAchievementsReady()
 {
 	local int WeaponIndex, VariantIndex, WeaponLockID;
 	local class<KFWeapon> WeaponClass;
+	log("Calling OnStatsAndAchievementsReady", 'KFTurbo');
 
 	InitStatInt(OwnedWeaponDLC, GetOwnedWeaponDLC());
 
@@ -23,6 +25,12 @@ simulated event OnStatsAndAchievementsReady()
 	{
 		for (VariantIndex = Link.PlayerVariantList[WeaponIndex].VariantList.Length - 1; VariantIndex >= 0; --VariantIndex)
 		{
+			//Skip items that don't need a lock.
+			if (Link.PlayerVariantList[WeaponIndex].VariantList[VariantIndex].ItemStatus == 0)
+			{
+				continue;
+			}
+
 			WeaponClass = class<KFWeapon>(Link.PlayerVariantList[WeaponIndex].VariantList[VariantIndex].VariantClass.default.InventoryType);
 
 			//Test DLC status.

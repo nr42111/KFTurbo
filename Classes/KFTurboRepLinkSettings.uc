@@ -222,9 +222,7 @@ function Initialize()
             else
             {
                 VariantWeaponEntry.VariantClass = KFWeaponVariantPickupClass;
-                VariantWeaponEntry.ItemStatus = 255;
-                AssignEntryVariantID(VariantWeaponEntry);
-
+                SetupVariantWeaponEntry(VariantWeaponEntry);
                 VariantWeaponList[NewVariantIndex].VariantList[VariantWeaponList[NewVariantIndex].VariantList.Length] = VariantWeaponEntry;
             }
 
@@ -236,7 +234,7 @@ function Initialize()
     log("The above time is KFTurboRepLinkSettings::Initialize duration.", 'KFTurbo');
 }
 
-function AssignEntryVariantID(out VariantWeapon Entry)
+function SetupVariantWeaponEntry(out VariantWeapon Entry)
 {
     Entry.VariantID = "";
 
@@ -248,22 +246,27 @@ function AssignEntryVariantID(out VariantWeapon Entry)
     if (IsGenericGoldSkin(Entry.VariantClass))
     {
         Entry.VariantID = GoldVariantID;
+        Entry.ItemStatus = 255; //Flag Gold weapons as awaiting DLC update.
     }
     else if (IsGenericCamoSkin(Entry.VariantClass))
     {
         Entry.VariantID = CamoVariantID;
+        Entry.ItemStatus = 255; //Flag Camo weapons as awaiting DLC update.
     }
     else if (IsGenericTurboSkin(Entry.VariantClass))
     {
         Entry.VariantID = TurboVariantID;
+        Entry.ItemStatus = 0;
     }
     else if (IsGenericVMSkin(Entry.VariantClass))
     {
         Entry.VariantID = VMVariantID;
+        Entry.ItemStatus = 0;
     }
     else if (IsGenericWestLondonSkin(Entry.VariantClass))
     {
         Entry.VariantID = WLVariantID;
+        Entry.ItemStatus = 0;
     }
 }
 

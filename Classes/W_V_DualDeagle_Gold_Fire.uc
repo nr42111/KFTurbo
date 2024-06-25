@@ -1,4 +1,4 @@
-class W_Deagle_Fire_G extends GoldenDeagleFire;
+class W_V_DualDeagle_Gold_Fire extends GoldenDualDeagleFire;
 
 function DoTrace(Vector Start, Rotator Dir)
 {

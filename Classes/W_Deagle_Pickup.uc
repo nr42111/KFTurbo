@@ -39,6 +39,6 @@ function inventory SpawnCopy(pawn Other)
 defaultproperties
 {
      VariantClasses(0)=Class'KFTurbo.W_Deagle_Pickup'
-     VariantClasses(1)=Class'KFTurbo.W_Deagle_Pickup_G'
+     VariantClasses(1)=Class'KFTurbo.W_V_Deagle_Gold_Pickup'
      InventoryType=Class'KFTurbo.W_Deagle_Weap'
 }

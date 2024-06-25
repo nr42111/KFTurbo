@@ -1,4 +1,4 @@
-class W_Deagle_Pickup_G extends GoldenDeaglePickup;
+class W_V_Deagle_Gold_Pickup extends GoldenDeaglePickup;
 
 function inventory SpawnCopy(pawn Other)
 {
@@ -23,7 +23,7 @@ function inventory SpawnCopy(pawn Other)
 		{
 			if (Inventory != none)
 				Inventory.Destroy();
-			InventoryType = Class'W_DualDeagle_Weap_G';
+			InventoryType = Class'W_V_DualDeagle_Gold_Weap';
 			AmmoAmount[0] += Deagle(I).AmmoAmount(0);
 			MagAmmoRemaining += Deagle(I).MagAmmoRemaining;
 			I.Destroyed();
@@ -39,6 +39,6 @@ function inventory SpawnCopy(pawn Other)
 defaultproperties
 {
      VariantClasses(0)=Class'KFTurbo.W_Deagle_Pickup'
-     VariantClasses(1)=Class'KFTurbo.W_Deagle_Pickup_G'
-     InventoryType=Class'KFTurbo.W_Deagle_Weap_G'
+     VariantClasses(1)=Class'KFTurbo.W_V_Deagle_Gold_Pickup'
+     InventoryType=Class'KFTurbo.W_V_Deagle_Gold_Weap'
 }
