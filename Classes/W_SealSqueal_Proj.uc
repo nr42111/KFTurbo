@@ -80,12 +80,14 @@ simulated function StickToPawn(Pawn HitPawn, Vector HitLocation, Vector HitDirec
 	local float Distance;
 	local KFMonster KFM;
 
-    NearestBone = HitPawn.GetClosestBone(HitLocation, HitDirection, Distance);
-
 	//We'll give players a little helping hand when trying to stick headshots.
 	if(VSizeSquared(HitPawn.GetBoneCoords(HitPawn.HeadBone).Origin - HitLocation) < 1024.f)
 	{
 		NearestBone = HitPawn.HeadBone;
+	}
+	else
+	{
+		NearestBone = HitPawn.GetClosestBone(HitLocation, HitDirection, Distance);
 	}
 
 	bBlockActors = false;
